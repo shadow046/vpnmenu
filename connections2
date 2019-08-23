@@ -1,0 +1,32 @@
+#!/bin/bash
+
+clear
+if [ -f "/etc/openvpn/openvpn-status.log" ]; then
+        line=`cat /etc/openvpn/openvpn-status.log | wc -l`
+        a=$((3+((line-8)/2)))
+        b=$(((line-8)/2))
+        echo " "
+        echo "-----=[ OpenVPN User Login ]=-----";
+        echo "Username  |  IP Address  |  Connected Since";
+        echo "-------------------------------------";
+        cat /etc/openvpn/openvpn-status.log | head -n $a | tail -n $b | cut -d, -f1 | sed -e 's/,/   /g' > /tmp/vpn-login-db.txt
+        cat /tmp/vpn-login-db.txt
+	sort /tmp/vpn-login-db.txt | uniq -d > /etc/openvpn/double_login.txt
+	pathofile='/etc/openvpn/double_login.txt'
+	while read name; do
+	# reading each line
+	if [ -z "$name" ]
+	then
+	echo "Off" > /etc/openvpn/checked_multi
+	else
+	cat /etc/openvpn/double_login.txt >> /etc/lock
+	passwd -l $line
+	sudo service openvpn restart
+	fi
+	done < $pathtofile
+	sudo rm /etc/openvpn/double_login.txt
+fi
+
+
+echo " "
+echo " "
